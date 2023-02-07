@@ -17,7 +17,11 @@ public class Problem1 {
         System.out.println("Processing Array:" + Arrays.toString(arr));
         System.out.println("Odds output:");
         //TODO add/edit code here
-        
+        for(int i=0; i<arr.length; i++){ // parsing each int in arr
+            if(arr[i] % 2 != 0){ // checking if current int is odd
+                System.out.print(arr[i] + " "); // printing int if it is odd
+            } //I (rmd2) did all this in one day, 2/6/2023.
+        }
         //end add/edit section
         System.out.println();
         System.out.println("End process");

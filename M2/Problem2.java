@@ -18,7 +18,11 @@ public class Problem2 {
         double total = 0;
         String totalOutput = "";
         //TODO add/edit code here
-       
+        for(int i=0; i<arr.length; i++){ //parse through each double in arr
+            total += arr[i]; //add each double to total
+        }
+        total = Math.round(total * 100) / 100.0; //rounds total to 2 decimal places
+        // I (rmd2) coded all this on 2/6/2023.
         //set the double to a string variable
         totalOutput = total+"";
         //end add/edit section

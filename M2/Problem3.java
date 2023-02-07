@@ -21,7 +21,23 @@ public class Problem3 {
         //TODO convert each value to positive
         //set the result to the proper index of the output array
         //hint: don't forget to handle the data types properly
-        
+        for(int i=0; i<arr.length; i++){ // parse all values in arr
+            if(arr[i] instanceof Integer){ // check if current value is an int
+                int temp = (Integer)arr[i]; // cast to int and store in a value to use
+                output[i] = Math.abs(temp); // set index of output to absolute value of current value
+            }
+            if(arr[i] instanceof Double){ // check if current value is a double
+                double temp = (Double)arr[i]; // cast to double and store in a value to use
+                output[i] = Math.abs(temp); // set index of output to absolute value of current value
+            }
+            if(arr[i] instanceof String){ // check if current value is a string
+                String temp = (String)arr[i]; // cast to string and store in a value to use
+                if(temp.substring(0,1).equals("-")){ // check to see if first char is a -
+                    output[i] = temp.substring(1); // if so, set index of output to same string but after the -
+                }
+                else output[i] = temp; // if it isn't negative just set index of output to the original string
+            } // I (rmd2) completed all the above code on 2/7/2023.
+        }
         //end edit section
 
         StringBuilder sb = new StringBuilder();
