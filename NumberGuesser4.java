@@ -1,4 +1,4 @@
-public import java.io.File;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -128,6 +128,20 @@ public class NumberGuesser4 {
             pickNewRandom = true;
         } else {
             System.out.println("That's wrong");
+            if(guess > number){ // see if guess is greater than actual
+                System.out.println("Hint: Lower"); // if so, print lower
+            }
+            else System.out.println("Hint: Higher"); // otherwise, print higher
+            // rmd2, 2/15/2023, higher/lower hint (#1)
+            int dist = Math.abs(guess - number); // get distance from correct value
+            if(dist >= 10){ // conditions for cold
+                System.out.println("You're cold..");
+            }
+            else if(dist >= 5){ // conditions for warm
+                System.out.println("You're warm.");
+            }
+            else System.out.println("You're HOT!"); // hot otherwise
+            // rmd2, 2/15/2023, cold, warm, hot indicator (#4)
             strikes++;
             if (strikes >= maxStrikes) {
                 lose();
