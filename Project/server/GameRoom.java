@@ -1,4 +1,4 @@
-package HNS.server;
+package Project.server;
 
 public class GameRoom extends Room {
 
