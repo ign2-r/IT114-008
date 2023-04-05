@@ -1,11 +1,11 @@
-package HNS.server;
+package Project.server;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import HNS.common.Constants;
+import Project.common.Constants;
 
 public class Room implements AutoCloseable {
     // server is a singleton now so we don't need this
@@ -21,6 +21,8 @@ public class Room implements AutoCloseable {
     private final static String DISCONNECT = "disconnect";
     private final static String LOGOUT = "logout";
     private final static String LOGOFF = "logoff";
+    private final static String ROLL = "roll";
+    private final static String FLIP = "flip";
     private static Logger logger = Logger.getLogger(Room.class.getName());
 
     public Room(String name) {
@@ -114,6 +116,7 @@ public class Room implements AutoCloseable {
                 String[] comm2 = part1.split(" ");
                 String command = comm2[0];
                 String roomName;
+                //String dice;
                 wasCommand = true;
                 switch (command) {
                     case CREATE_ROOM:
@@ -124,6 +127,14 @@ public class Room implements AutoCloseable {
                         roomName = comm2[1];
                         Room.joinRoom(roomName, client);
                         break;
+                    /*case ROLL:
+                        dice = comm2[1];
+                        Room.rollDice(dice, client);
+                        break;
+                    case FLIP:
+                        Room.coinFlip(client);
+                        break;
+                    */
                     case DISCONNECT:
                     case LOGOUT:
                     case LOGOFF:
@@ -155,6 +166,36 @@ public class Room implements AutoCloseable {
         }
     }
 
+    /*protected void rollDice(String dice, ServerThread client){ // Rockwell Dela Rosa (rmd2), 4/5/2023
+        if(dice.matches("[0-9]+)")){
+            int diceNum = Integer.parseInt(dice);
+            int result = (int)(Math.random() * (diceNum - 1));
+            String message = client.getClientName() + " rolled a " + result + ".";
+            sendMessage(null, message);
+        }
+        else{
+            String[] tokens = dice.split("d");
+            int diceNum = Integer.parseInt(tokens[0]);
+            int sidesNum = Integer.parseInt(tokens[1]);
+            int total = 0;
+            for (int i = 0; i < diceNum; i++) {
+                total += (int)(Math.random() * (sidesNum - 1));
+            }
+            String message = client.getClientName() + " rolled a " + total + ".";
+            sendMessage(null, message);
+        }
+    }
+
+    protected void coinFlip(ServerThread client){
+        double rand = Math.random();
+        if(rand >= 0.5){
+            sendMessage(null, client.getClientName() + " flipped a coin and landed on heads.");
+        }
+        else{
+            sendMessage(null, client.getClientName() + " flipped a coin and landed on tails.");
+        }
+    }*/
+
     /**
      * Will cause the client to leave the current room and be moved to the new room
      * if applicable
@@ -182,7 +223,47 @@ public class Room implements AutoCloseable {
      * @param sender  The client sending the message
      * @param message The message to broadcast inside the room
      */
-    protected synchronized void sendMessage(ServerThread sender, String message) {
+    protected synchronized void sendMessage(ServerThread sender, String message) { //Rockwell Dela Rosa, rmd2 4/5/2023
+        if(message.startsWith("**") && message.endsWith("**")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<b>" + message + "<b>";
+        }
+        if(message.startsWith("__") && message.endsWith("__")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<u>" + message + "<u>";
+        }
+        if(message.startsWith("_") && message.endsWith("_")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<i>" + message + "<i>";
+        }
+        if(message.startsWith("#r") && message.endsWith("r#")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<font color='red'>" + message + "</font>";
+        }
+        if(message.startsWith("#o") && message.endsWith("o#")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<font color='orange'>" + message + "</font>";
+        }
+        if(message.startsWith("#y") && message.endsWith("y#")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<font color='yellow'>" + message + "</font>";
+        }
+        if(message.startsWith("#g") && message.endsWith("r#")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<font color='green'>" + message + "</font>";
+        }
+        if(message.startsWith("#b") && message.endsWith("b#")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<font color='blue'>" + message + "</font>";
+        }
+        if(message.startsWith("#i") && message.endsWith("i#")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<font color='indigo'>" + message + "</font>";
+        }
+        if(message.startsWith("#v") && message.endsWith("v#")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<font color='violet'>" + message + "</font>";
+        }
         if (!isRunning) {
             return;
         }

@@ -1,4 +1,4 @@
-package HNS.client;
+package Project.client;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -11,10 +11,10 @@ import java.util.Scanner;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import HNS.common.Constants;
-import HNS.common.Payload;
-import HNS.common.PayloadType;
-import HNS.common.RoomResultPayload;
+import Project.common.Constants;
+import Project.common.Payload;
+import Project.common.PayloadType;
+import Project.common.RoomResultPayload;
 
 public enum Client {
     Instance;
@@ -123,7 +123,7 @@ public enum Client {
     @Deprecated // removing in Milestone3
     private boolean processClientCommand(String text) throws IOException {
         if (isConnection(text)) {
-            if (clientName.isBlank()) {
+            if (clientName.isEmpty()) {
                 System.out.println("You must set your name before you can connect via: /name your_name");
                 return true;
             }

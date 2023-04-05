@@ -1,4 +1,4 @@
-package HNS.common;
+package Project.common;
 
 public enum PayloadType {
     CONNECT, DISCONNECT, MESSAGE, CLIENT_ID, RESET_USER_LIST,

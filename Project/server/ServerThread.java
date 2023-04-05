@@ -1,4 +1,4 @@
-package HNS.server;
+package Project.server;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -7,10 +7,10 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import HNS.common.Constants;
-import HNS.common.Payload;
-import HNS.common.PayloadType;
-import HNS.common.RoomResultPayload;
+import Project.common.Constants;
+import Project.common.Payload;
+import Project.common.PayloadType;
+import Project.common.RoomResultPayload;
 
 /**
  * A server-side representation of a single client
@@ -47,7 +47,7 @@ public class ServerThread extends Thread {
     }
 
     protected void setClientName(String name) {
-        if (name == null || name.isBlank()) {
+        if (name == null || name.isEmpty()) {
             logger.warning("Invalid name being set");
             return;
         }

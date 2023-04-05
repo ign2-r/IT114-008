@@ -1,10 +1,12 @@
-package HNS.common;
+package Project.common;
 
 import java.io.Serializable;
 
 public class Payload implements Serializable {
     // read https://www.baeldung.com/java-serial-version-uid
     private static final long serialVersionUID = 1L;// change this if the class changes
+
+    //Rockwell Dela Rosa (rmd2) - 4/5/2023
 
     /**
      * Determines how to process the data on the receiver's side
