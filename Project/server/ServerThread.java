@@ -1,4 +1,4 @@
-package HNS.server;
+package Project.server;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -7,22 +7,29 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import HNS.common.Constants;
-import HNS.common.Payload;
-import HNS.common.PayloadType;
-import HNS.common.RoomResultPayload;
+import Project.common.CellData;
+import Project.common.CellPayload;
+import Project.common.Constants;
+import Project.common.GridData;
+import Project.common.GridPayload;
+import Project.common.Payload;
+import Project.common.PayloadType;
+import Project.common.Phase;
+import Project.common.PointsPayload;
+import Project.common.PositionPayload;
+import Project.common.RoomResultPayload;
 
 /**
  * A server-side representation of a single client
  */
 public class ServerThread extends Thread {
-    private Socket client;
+    protected Socket client;
     private String clientName;
     private boolean isRunning = false;
     private ObjectOutputStream out;// exposed here for send()
     // private Server server;// ref to our server so we can call methods on it
     // more easily
-    private Room currentRoom;
+    protected Room currentRoom;
     private static Logger logger = Logger.getLogger(ServerThread.class.getName());
     private long myClientId;
 
@@ -42,12 +49,13 @@ public class ServerThread extends Thread {
         logger.info("ServerThread created");
         // get communication channels to single client
         this.client = myClient;
-        this.currentRoom = room;
+        // this.currentRoom = room;
+        setCurrentRoom(room);
 
     }
 
     protected void setClientName(String name) {
-        if (name == null || name.isBlank()) {
+        if (name == null || name.isEmpty()) {
             logger.warning("Invalid name being set");
             return;
         }
@@ -65,6 +73,7 @@ public class ServerThread extends Thread {
     protected synchronized void setCurrentRoom(Room room) {
         if (room != null) {
             currentRoom = room;
+            sendRoomName(room.getName());
         } else {
             logger.info("Passed in room was null, this shouldn't happen");
         }
@@ -78,6 +87,62 @@ public class ServerThread extends Thread {
     }
 
     // send methods
+    public boolean sendPoints(long clientId, int points) {
+        PointsPayload pp = new PointsPayload();
+        pp.setClientId(clientId);
+        pp.setPoints(points);
+        return send(pp);
+    }
+
+    public boolean sendCell(CellData cd) {
+        CellPayload cp = new CellPayload();
+        cp.setCellData(cd);
+        return send(cp);
+    }
+
+    /**
+     * 
+     * @param grid the grid to sync or null to tell clients to clear their grid
+     * @return
+     */
+    public boolean sendGrid(GridData grid) {
+        GridPayload gp = new GridPayload();
+        gp.setGrid(grid);
+        return send(gp);
+    }
+
+    /**
+     * 
+     * @param clientId if -1 will reset client's data, else marks player out
+     * @return
+     */
+    public boolean sendOut(long clientId) {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.OUT);
+        p.setClientId(clientId);
+        return send(p);
+    }
+
+    public boolean sendSeeker(long clientId) {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.SEEKER);
+        p.setClientId(clientId);
+        return send(p);
+    }
+
+    public boolean sendHidePosition(int x, int y, long clientId) {
+        PositionPayload pp = new PositionPayload();// defaults to hide
+        pp.setCoord(x, y);
+        pp.setClientId(clientId);
+        return send(pp);
+    }
+
+    public boolean sendPhaseSync(Phase phase) {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.PHASE);
+        p.setMessage(phase.name());
+        return send(p);
+    }
 
     public boolean sendReadyStatus(long clientId) {
         Payload p = new Payload();
@@ -166,6 +231,7 @@ public class ServerThread extends Thread {
         try (ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
                 ObjectInputStream in = new ObjectInputStream(client.getInputStream());) {
             this.out = out;
+            logger.info("Listening for Client Payloads");
             isRunning = true;
             Payload fromClient;
             while (isRunning && // flag to let us easily control the loop
@@ -179,7 +245,9 @@ public class ServerThread extends Thread {
             } // close while loop
         } catch (Exception e) {
             // happens when client disconnects
+            System.out.println(Constants.ANSI_BRIGHT_RED);
             e.printStackTrace();
+            System.out.println(Constants.ANSI_RESET);
             logger.info("Client disconnected");
         } finally {
             isRunning = false;
@@ -215,7 +283,30 @@ public class ServerThread extends Thread {
                 Room.joinRoom(p.getMessage().trim(), this);
                 break;
             case READY:
-                // ((GameRoom) currentRoom).setReady(myClientId);
+                try {
+                    ((GameRoom) currentRoom).setReady(this);
+                } catch (Exception e) {
+                    logger.severe(String.format("There was a problem during readyCheck %s", e.getMessage()));
+                    e.printStackTrace();
+                }
+                break;
+            case SEEK:
+                try {
+                    PositionPayload pp = (PositionPayload) p;
+                    ((GameRoom) currentRoom).checkSeekPosition(pp.getX(), pp.getY(), myClientId);
+                } catch (Exception e) {
+                    logger.severe(String.format("There was a problem during checkSeekPosition %s", e.getMessage()));
+                    e.printStackTrace();
+                }
+                break;
+            case HIDE:
+                try {
+                    PositionPayload pp = (PositionPayload) p;
+                    ((GameRoom) currentRoom).setHidePosition(pp.getX(), pp.getY(), myClientId);
+                } catch (Exception e) {
+                    logger.severe(String.format("There was a problem during setHidePosition %s", e.getMessage()));
+                    e.printStackTrace();
+                }
                 break;
             default:
                 break;
