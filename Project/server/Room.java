@@ -130,6 +130,13 @@ public class Room implements AutoCloseable {
                     case LOGOFF:
                         Room.disconnectClient(client, this);
                         break;
+                    case "roll":
+                        String dice = comm2[1];
+                        rollDice(dice, client);
+                        break;
+                    case "flip":
+                        flipCoin(client);
+                        break;
                     default:
                         wasCommand = false;
                         break;
@@ -139,6 +146,36 @@ public class Room implements AutoCloseable {
             e.printStackTrace();
         }
         return wasCommand;
+    }
+
+    private void rollDice(String dice, ServerThread client) { // rmd2, 5/12/2023
+        if(dice.matches("([0-9]+)")){ // if it is just a number, it is one die
+            int diceNum = Integer.parseInt(dice); // turn to int
+            int result = (int)(Math.random() * (diceNum + 1)); // randomize result
+            String message = "<b>" + client.getClientName() + " rolled a " + result + ".</b>"; // store result in string
+            client.sendMessage(Constants.DEFAULT_CLIENT_ID, message); //send it
+        }
+        else{
+            String[] tokens = dice.split("d"); //if it has a d, it is multiple dice, so separate the two
+            int diceNum = Integer.parseInt(tokens[0]); // number of dice
+            int sidesNum = Integer.parseInt(tokens[1]); // number of sides per die
+            int total = 0;
+            for(int i = 0; i < diceNum; i++){
+                total += (int)(Math.random() * (sidesNum+1)); // total each roll
+            }
+            String message = "<b>" + client.getClientName() + " rolled a " + total + ".</b>"; //store result in string
+            client.sendMessage(Constants.DEFAULT_CLIENT_ID, message);//send it
+        }
+    }
+    
+    private void flipCoin(ServerThread client) { // rmd2, 5/12/2023
+        double rand = Math.random(); // random number gen for heads/tails
+        if(rand >= 0.5){ //anything 0.5 above is heads, otherwise tails
+            client.sendMessage(Constants.DEFAULT_CLIENT_ID, "<b>" + client.getClientName() + " flipped a coin and landed on heads.</b>"); //send
+        }
+        else{
+            client.sendMessage(Constants.DEFAULT_CLIENT_ID, "<b>" + client.getClientName() + " flipped a coin and landed on tails.</b>");
+        }
     }
 
     // Command helper methods
@@ -183,7 +220,67 @@ public class Room implements AutoCloseable {
      * @param sender  The client sending the message
      * @param message The message to broadcast inside the room
      */
-    protected synchronized void sendMessage(ServerThread sender, String message) {
+
+    protected synchronized void privateMessage(ServerThread sender, String message){
+        String[] msg = message.split(" ", 2);
+        String sendee = msg[0].substring(1);
+        String actualMsg = msg[1];
+        boolean recipientFound = false;
+        for (ServerThread recipient : clients) {
+            if (recipient.getClientName().equalsIgnoreCase(sendee)) {
+                recipient.sendMessage(sender.getClientId(), "[Whispered] " + sender.getClientName() + ": " + actualMsg);
+                recipientFound = true;
+                break;
+            }
+        }
+        if (!recipientFound) {
+            sender.sendMessage(Constants.DEFAULT_CLIENT_ID, "User '" + sendee + "' not found.");
+        }
+    }
+    protected synchronized void sendMessage(ServerThread sender, String message){
+        if(message.startsWith("@")){
+            privateMessage(sender, message);
+        }
+        if(message.startsWith("**") && message.endsWith("**")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<b>" + message + "</b>";
+        }
+        if(message.startsWith("__") && message.endsWith("__")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<u>" + message + "</u>";
+        }
+        if(message.startsWith("_") && message.endsWith("_")){
+            message = message.substring(1, (message.length() - 1));
+            message = "<i>" + message + "</i>";
+        }
+        if(message.startsWith("#r") && message.endsWith("r#")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<font color = 'red'>" + message + "</font>";
+        }
+        if(message.startsWith("#o") && message.endsWith("o#")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<font color = 'orange'>" + message + "</font>";
+        }
+        if(message.startsWith("#y") && message.endsWith("y#")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<font color = 'yellow'>" + message + "</font>";
+        }
+        if(message.startsWith("#g") && message.endsWith("g#")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<font color = 'green'>" + message + "</font>";
+        }
+        if(message.startsWith("#b") && message.endsWith("b#")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<font color = 'blue'>" + message + "</font>";
+        }
+        if(message.startsWith("#i") && message.endsWith("i#")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<font color = 'indigo'>" + message + "</font>";
+        }
+        if(message.startsWith("#v") && message.endsWith("v#")){
+            message = message.substring(2, (message.length() - 2));
+            message = "<font color = 'violet'>" + message + "</font>";
+        }
         if (!isRunning) {
             return;
         }

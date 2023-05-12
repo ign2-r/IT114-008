@@ -54,7 +54,7 @@ public class ChatPanel extends JPanel {
         // no need to add content specifically because scroll wraps it
         wrapper.add(scroll);
         this.add(wrapper, BorderLayout.CENTER);
-
+        // rmd2, 5/11/2023, allowing enter to submit msg
         JPanel input = new JPanel();
         input.setLayout(new BoxLayout(input, BoxLayout.X_AXIS));
         JTextField textValue = new JTextField();
